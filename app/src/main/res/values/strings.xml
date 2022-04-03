@@ -1,8 +1,8 @@
 <resources>
     <string name="app_description">Send WhatsApp message to unsaved contacts directly.</string>
-    <string name="app_name">WhatsApp Direct</string>
+    <string name="app_name">WhatsCheck</string>
 
-    <string name="about_app">WhatsApp Direct designed and created by Mohammad Yasir. All rights reserved.\nThis application is not affiliated or associated with WhatsApp in any way.</string>
+    <string name="about_app">WhatsCheck, created by Ramón Hernández García as a fork of WhatsApp Direct, designed and created by Mohammad Yasir.\nThis version merges the TensorFlow Lite engine used in <a href="https://github.com/NSTiwari/Custom-Text-Classification-on-Android-using-TF-Lite/">this app</a> by <a href="https://github.com/NSTiwari">NSTiwari</a>. All rights reserved.\nThis application is not affiliated or associated with WhatsApp in any way. Source code <a href="https://github.com/Text-Analysis-Android-Apps/WhatsCheck">here</a></string>
     <string name="sent_icon"><a href="https://icons8.com/icon/ZznWGhUzgWtS/sent" target="_blank">Sent</a> icon by <a href="https://icons8.com" target="_blank">Icons8</a></string>
     <string name="country_icons">Flags of countries obtained from <a href="https://flagpedia.net" target="_blank">Flagpedia.net</a></string>
     <string name="fluent_icons"><a href="https://github.com/microsoft/fluentui-system-icons">Fluent UI System Icons</a> by <a href="https://www.microsoft.com/design/fluent/">Microsoft</a></string>

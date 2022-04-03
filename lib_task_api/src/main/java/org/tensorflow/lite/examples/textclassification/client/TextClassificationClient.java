@@ -40,7 +40,9 @@ public class TextClassificationClient {
 
   public void load() {
     try {
+      Log.w(TAG, "Leyendo archivo "+MODEL_PATH);
       classifier = NLClassifier.createFromFile(context, MODEL_PATH);
+      Log.w(TAG, "Archivo "+MODEL_PATH+" leído correctamente");
     } catch (IOException e) {
       Log.e(TAG, e.getMessage());
     }
