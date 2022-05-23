@@ -1,5 +1,7 @@
 package es.ramonhg.whatscheck;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -97,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
     private void setClickListeners() {
 
-        binding.sendBusiness.setOnClickListener(v -> sendClicked(true));
-        binding.send.setOnClickListener(v -> sendClicked(false));
+        binding.sendBusiness.setOnClickListener(v -> classifyForSendButton((binding.text.getText() == null ? "" : binding.text.getText().toString()).replaceAll("[^a-zA-Z ]", ""), true));
+        binding.send.setOnClickListener(v -> classifyForSendButton((binding.text.getText() == null ? "" : binding.text.getText().toString()).replaceAll("[^a-zA-Z ]", ""), false));
         // Analyze button
         binding.analyze.setOnClickListener(v -> classify((binding.text.getText() == null ? "" : binding.text.getText().toString()).replaceAll("[^a-zA-Z ]", "")));
 
@@ -227,6 +229,58 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                     // Show classification result on screen
                     showResult(text, results);
+                });
+    }
+
+    /** The same functionality as classify method but for send buttons */
+    private void classifyForSendButton(final String text, boolean business) {
+        Log.d(TAG, "Clasifying text from button: "+text);
+        handler.post(
+                () -> {
+                    // Run text classification with TF Lite.
+                    List<Result> results = client.classify(text);
+
+                    String mostProbableSentiment = "";
+                    float probability = 0;
+
+                    for (Result r : results) {
+                        if (r.getConfidence() > probability) {
+                            mostProbableSentiment = r.getTitle();
+                            probability = r.getConfidence();
+                        }
+                    }
+                    probability = Math.round(100*probability);
+
+                    if (mostProbableSentiment.equals("Offensive")) {
+                        Log.d(TAG, "The text was detected to be offensive");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                        builder.setMessage("Your message was detected as offensive ("+(int)probability+" %).\n" +
+                                        "Would you like to continue sending it?")
+                                .setTitle(R.string.alert_before_send_title);
+
+                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User clicked OK button. The message will be sent
+                                Log.d(TAG, "The user confirmed the request");
+                                sendClicked(business);
+                            }
+                        });
+
+                        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog. Nothing more will be done
+                                        Log.d(TAG, "The user canceled the request");
+                                    }
+                        });
+
+                        // Show the dialog
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    } else {
+                        // If the message is not detected as offensive, the message is directly sent over WhatsApp
+                        sendClicked(business);
+                    }
                 });
     }
 
