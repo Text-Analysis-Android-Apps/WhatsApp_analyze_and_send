@@ -43,4 +43,5 @@
     <string name="alert_before_send_title">Are you sure you want to send the message?</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="empty_message">The message to analyze can not be empty</string>
 </resources>

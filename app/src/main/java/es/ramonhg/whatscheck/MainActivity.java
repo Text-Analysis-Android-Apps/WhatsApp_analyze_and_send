@@ -221,6 +221,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
     /** Send input text to TextClassificationClient and get the classify messages. */
     private void classify(final String text) {
+        if (text.isEmpty()) {
+            Toast.makeText(this, getString(R.string.empty_message), Toast.LENGTH_SHORT).show();
+            return;
+        }
         Log.d(TAG, "Clasifying text: "+text);
         handler.post(
                 () -> {
@@ -234,51 +238,58 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
     /** The same functionality as classify method but for send buttons */
     private void classifyForSendButton(final String text, boolean business) {
-        Log.d(TAG, "Clasifying text from button: "+text);
+        boolean classifyText = !text.isEmpty();
+        if (classifyText)
+            Log.d(TAG, "Clasifying text from button: "+text);
         handler.post(
                 () -> {
-                    // Run text classification with TF Lite.
-                    List<Result> results = client.classify(text);
+                    if (classifyText) {
+                        // Run text classification with TF Lite.
+                        List<Result> results = client.classify(text);
 
-                    String mostProbableSentiment = "";
-                    float probability = 0;
+                        String mostProbableSentiment = "";
+                        float probability = 0;
 
-                    for (Result r : results) {
-                        if (r.getConfidence() > probability) {
-                            mostProbableSentiment = r.getTitle();
-                            probability = r.getConfidence();
-                        }
-                    }
-                    probability = Math.round(100*probability);
-
-                    if (mostProbableSentiment.equals("Offensive")) {
-                        Log.d(TAG, "The text was detected to be offensive");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-                        builder.setMessage("Your message was detected as offensive ("+(int)probability+" %).\n" +
-                                        "Would you like to continue sending it?")
-                                .setTitle(R.string.alert_before_send_title);
-
-                        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User clicked OK button. The message will be sent
-                                Log.d(TAG, "The user confirmed the request");
-                                sendClicked(business);
+                        for (Result r : results) {
+                            if (r.getConfidence() > probability) {
+                                mostProbableSentiment = r.getTitle();
+                                probability = r.getConfidence();
                             }
-                        });
+                        }
+                        probability = Math.round(100 * probability);
 
-                        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // User cancelled the dialog. Nothing more will be done
-                                        Log.d(TAG, "The user canceled the request");
-                                    }
-                        });
+                        if (mostProbableSentiment.equals("Offensive")) {
+                            Log.d(TAG, "The text was detected to be offensive");
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                        // Show the dialog
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
+                            builder.setMessage("Your message was detected as offensive (" + (int) probability + " %).\n" +
+                                            "Would you like to continue sending it?")
+                                    .setTitle(R.string.alert_before_send_title);
+
+                            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User clicked OK button. The message will be sent
+                                    Log.d(TAG, "The user confirmed the request");
+                                    sendClicked(business);
+                                }
+                            });
+
+                            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog. Nothing more will be done
+                                    Log.d(TAG, "The user canceled the request");
+                                }
+                            });
+
+                            // Show the dialog
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        } else {
+                            // If the message is not detected as offensive, the message is directly sent over WhatsApp
+                            sendClicked(business);
+                        }
                     } else {
-                        // If the message is not detected as offensive, the message is directly sent over WhatsApp
+                        // The message is empty. We can directly generate the intent
                         sendClicked(business);
                     }
                 });
